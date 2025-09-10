@@ -232,6 +232,88 @@ export function CorrectorTab() {
     }
   }
 
+  const makeMoreEnergetic = () => {
+    const energeticWords = {
+      love: "passion",
+      feel: "explode",
+      heart: "soul",
+      night: "fire",
+      dance: "move wild",
+      music: "beat drops",
+      together: "united",
+      forever: "eternal",
+    }
+
+    applyWordReplacements(energeticWords, "Made lyrics more energetic")
+  }
+
+  const makeMoreRomantic = () => {
+    const romanticWords = {
+      party: "embrace",
+      club: "moonlight",
+      beat: "heartbeat",
+      loud: "gentle",
+      crazy: "dreamy",
+      wild: "tender",
+      fire: "starlight",
+      power: "love",
+    }
+
+    applyWordReplacements(romanticWords, "Made lyrics more romantic")
+  }
+
+  const simplifyWords = () => {
+    const simpleWords = {
+      magnificent: "great",
+      extraordinary: "amazing",
+      incredible: "awesome",
+      phenomenal: "fantastic",
+      spectacular: "wonderful",
+      marvelous: "perfect",
+      tremendous: "huge",
+      exceptional: "special",
+    }
+
+    applyWordReplacements(simpleWords, "Simplified complex words")
+  }
+
+  const addBetterRhymes = () => {
+    const rhymeReplacements = {
+      day: "way",
+      night: "light",
+      heart: "start",
+      love: "above",
+      feel: "real",
+      time: "shine",
+      dance: "chance",
+      free: "me",
+    }
+
+    applyWordReplacements(rhymeReplacements, "Improved rhyme scheme")
+  }
+
+  const applyWordReplacements = (replacements: Record<string, string>, message: string) => {
+    const updatedSections = sections.map((section) => {
+      let content = section.content
+
+      Object.entries(replacements).forEach(([from, to]) => {
+        const regex = new RegExp(`\\b${from}\\b`, "gi")
+        content = content.replace(regex, to)
+      })
+
+      return { ...section, content }
+    })
+
+    updatedSections.forEach((section, index) => {
+      updateSection(index, section.name, section.content)
+    })
+
+    toast({
+      title: "Rewrite Applied",
+      description: message,
+    })
+  }
+
   return (
     <div className="space-y-6">
       {/* Analysis Controls */}
@@ -393,44 +475,16 @@ export function CorrectorTab() {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              data-testid="make-more-energetic"
-              onClick={() =>
-                toast({ title: "Feature Coming Soon", description: "AI rewrite tools will be available soon" })
-              }
-            >
+            <Button variant="outline" size="sm" data-testid="make-more-energetic" onClick={makeMoreEnergetic}>
               More Energetic
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              data-testid="make-more-romantic"
-              onClick={() =>
-                toast({ title: "Feature Coming Soon", description: "AI rewrite tools will be available soon" })
-              }
-            >
+            <Button variant="outline" size="sm" data-testid="make-more-romantic" onClick={makeMoreRomantic}>
               More Romantic
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              data-testid="simplify-words"
-              onClick={() =>
-                toast({ title: "Feature Coming Soon", description: "AI rewrite tools will be available soon" })
-              }
-            >
+            <Button variant="outline" size="sm" data-testid="simplify-words" onClick={simplifyWords}>
               Simplify Words
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              data-testid="add-rhymes"
-              onClick={() =>
-                toast({ title: "Feature Coming Soon", description: "AI rewrite tools will be available soon" })
-              }
-            >
+            <Button variant="outline" size="sm" data-testid="add-rhymes" onClick={addBetterRhymes}>
               Better Rhymes
             </Button>
           </div>

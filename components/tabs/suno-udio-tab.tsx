@@ -12,7 +12,7 @@ import { Copy, Wand2, Sparkles } from "lucide-react"
 import { useMetaStore } from "@/store/meta-store"
 import { useLyricsStore } from "@/store/lyrics-store"
 import { useStylesStore } from "@/store/styles-store"
-import { buildStyle } from "@/src/lib/buildStyle"
+import { buildStyle } from "@/lib/buildStyle"
 import { useToast } from "@/hooks/use-toast"
 
 export function SunoUdioTab() {

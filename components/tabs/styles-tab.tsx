@@ -14,7 +14,7 @@ import { useToast } from "@/hooks/use-toast"
 import { useMetaStore } from "@/store/meta-store"
 import { useStylesStore } from "@/store/styles-store"
 import { useLyricsStore } from "@/store/lyrics-store"
-import { buildStyle } from "@/src/lib/buildStyle"
+import { buildStyle } from "@/lib/buildStyle"
 import { Search, Download, Upload, Star, Play, Plus, Edit, Trash2 } from "lucide-react"
 
 export function StylesTab() {
