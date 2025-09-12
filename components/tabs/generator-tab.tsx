@@ -47,7 +47,6 @@ export function GeneratorTab() {
     setDryVocals,
     setIntroWithoutKick,
     setStyle,
-    saveToHistory,
   } = useMetaStore()
 
   const { sections, formatLyricsForExport } = useLyricsStore()
@@ -112,12 +111,39 @@ export function GeneratorTab() {
     if (currentHash === lastSavedHash) return
 
     try {
-      await saveToHistory(lyricsText)
+      addEntry({
+        id: Date.now().toString(),
+        timestamp: new Date(),
+        lyrics: lyricsText,
+        style: styleText,
+        metadata: {
+          bpm,
+          key,
+          vocal,
+          era,
+          mood,
+          stylePercentage,
+          weirdnessPercentage,
+        },
+      })
       setLastSavedHash(currentHash)
     } catch (error) {
       console.error("Auto-save failed:", error)
     }
-  }, [styleText, sections, formatLyricsForExport, saveToHistory, lastSavedHash])
+  }, [
+    styleText,
+    sections,
+    formatLyricsForExport,
+    addEntry,
+    lastSavedHash,
+    bpm,
+    key,
+    vocal,
+    era,
+    mood,
+    stylePercentage,
+    weirdnessPercentage,
+  ])
 
   useEffect(() => {
     const timer = setTimeout(generateAutoStyle, 300)
@@ -178,7 +204,21 @@ export function GeneratorTab() {
     }
 
     try {
-      await saveToHistory(lyricsText)
+      addEntry({
+        id: Date.now().toString(),
+        timestamp: new Date(),
+        lyrics: lyricsText,
+        style: styleText,
+        metadata: {
+          bpm,
+          key,
+          vocal,
+          era,
+          mood,
+          stylePercentage,
+          weirdnessPercentage,
+        },
+      })
       const currentHash = btoa(`${styleText}${lyricsText}`).slice(0, 8)
       setLastSavedHash(currentHash)
       toast({ title: "Project saved to history" })
