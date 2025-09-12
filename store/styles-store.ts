@@ -1,5 +1,5 @@
 import { create } from "zustand"
-import { db, type StylePreset, initializeDefaultPresets } from "@/lib/database"
+import { STYLE_PRESETS, type StylePreset } from "@/store/presets"
 
 interface StylesState {
   presets: StylePreset[]
@@ -7,7 +7,7 @@ interface StylesState {
   isLoading: boolean
   searchQuery: string
   loadPresets: () => Promise<void>
-  createPreset: (preset: Omit<StylePreset, "id" | "createdAt" | "updatedAt">) => Promise<void>
+  createPreset: (preset: Omit<StylePreset, "id">) => Promise<void>
   updatePreset: (id: string, updates: Partial<StylePreset>) => Promise<void>
   deletePreset: (id: string) => Promise<void>
   selectPreset: (preset: StylePreset) => void
@@ -26,8 +26,7 @@ export const useStylesStore = create<StylesState>((set, get) => ({
   loadPresets: async () => {
     set({ isLoading: true })
     try {
-      await initializeDefaultPresets()
-      const presets = await db.stylePresets.orderBy("name").toArray()
+      const presets = [...STYLE_PRESETS]
       set({ presets, isLoading: false })
     } catch (error) {
       console.error("Failed to load presets:", error)
@@ -39,25 +38,18 @@ export const useStylesStore = create<StylesState>((set, get) => ({
     const preset: StylePreset = {
       ...presetData,
       id: crypto.randomUUID(),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
     }
 
-    await db.stylePresets.add(preset)
     set((state) => ({ presets: [...state.presets, preset] }))
   },
 
   updatePreset: async (id, updates) => {
-    const updatedPreset = { ...updates, updatedAt: new Date().toISOString() }
-    await db.stylePresets.update(id, updatedPreset)
-
     set((state) => ({
-      presets: state.presets.map((p) => (p.id === id ? { ...p, ...updatedPreset } : p)),
+      presets: state.presets.map((p) => (p.id === id ? { ...p, ...updates } : p)),
     }))
   },
 
   deletePreset: async (id) => {
-    await db.stylePresets.delete(id)
     set((state) => ({
       presets: state.presets.filter((p) => p.id !== id),
       selectedPreset: state.selectedPreset?.id === id ? null : state.selectedPreset,
@@ -76,8 +68,7 @@ export const useStylesStore = create<StylesState>((set, get) => ({
   importPresets: async (jsonData) => {
     try {
       const importedPresets: StylePreset[] = JSON.parse(jsonData)
-      await db.stylePresets.bulkAdd(importedPresets)
-      get().loadPresets()
+      set((state) => ({ presets: [...state.presets, ...importedPresets] }))
     } catch (error) {
       throw new Error("Invalid JSON format")
     }
@@ -91,10 +82,10 @@ export const useStylesStore = create<StylesState>((set, get) => ({
     return presets.filter(
       (preset) =>
         preset.name.toLowerCase().includes(query) ||
-        preset.description.toLowerCase().includes(query) ||
+        preset.styleLine.toLowerCase().includes(query) ||
         preset.key.toLowerCase().includes(query) ||
-        preset.vocal.toLowerCase().includes(query) ||
-        preset.referenceArtists.some((artist) => artist.toLowerCase().includes(query)),
+        preset.defaults.vocal.toLowerCase().includes(query) ||
+        preset.tags.some((tag) => tag.toLowerCase().includes(query)),
     )
   },
 }))

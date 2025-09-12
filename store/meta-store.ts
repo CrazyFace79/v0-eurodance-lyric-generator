@@ -1,6 +1,6 @@
 import { create } from "zustand"
 import { persist } from "zustand/middleware"
-import { useHistoryStore } from "./history-store"
+import { buildStyle } from "@/lib/buildStyle"
 
 interface MetaState {
   bpm: number
@@ -32,11 +32,9 @@ interface MetaState {
   setReferenceNotes: (notes: string) => void
   setReferenceArtists: (artists: string[]) => void
   setPresetId: (id: string) => void
-  setStylePct: (percentage: number) => void
-  setWeirdPct: (percentage: number) => void
   setStyle: (style: string) => void
   generateStyleLine: () => string
-  saveToHistory: (lyrics: string) => Promise<void>
+  updateStyleFromParams: () => void
 }
 
 export const useMetaStore = create<MetaState>()(
@@ -57,23 +55,59 @@ export const useMetaStore = create<MetaState>()(
       referenceArtists: [],
       presetId: "original_gospel_148",
       style: "",
-      setBpm: (bpm) => set({ bpm }),
-      setKey: (key) => set({ key }),
-      setVocal: (vocal) => set({ vocal }),
-      setEra: (era) => set({ era }),
-      setMood: (mood) => set({ mood }),
-      setStylePercentage: (percentage) => set({ stylePercentage: percentage }),
-      setWeirdnessPercentage: (percentage) => set({ weirdnessPercentage: percentage }),
-      setAcapellaOnly: (enabled) => set({ acapellaOnly: enabled }),
-      setNoInstruments: (enabled) => set({ noInstruments: enabled }),
-      setDryVocals: (enabled) => set({ dryVocals: enabled }),
-      setIntroWithoutKick: (enabled) => set({ introWithoutKick: enabled }),
+
+      setBpm: (bpm) => {
+        set({ bpm })
+        get().updateStyleFromParams()
+      },
+      setKey: (key) => {
+        set({ key })
+        get().updateStyleFromParams()
+      },
+      setVocal: (vocal) => {
+        set({ vocal })
+        get().updateStyleFromParams()
+      },
+      setEra: (era) => {
+        set({ era })
+        get().updateStyleFromParams()
+      },
+      setMood: (mood) => {
+        set({ mood })
+        get().updateStyleFromParams()
+      },
+      setStylePercentage: (percentage) => {
+        set({ stylePercentage: percentage })
+        get().updateStyleFromParams()
+      },
+      setWeirdnessPercentage: (percentage) => {
+        set({ weirdnessPercentage: percentage })
+        get().updateStyleFromParams()
+      },
+      setAcapellaOnly: (enabled) => {
+        set({ acapellaOnly: enabled })
+        get().updateStyleFromParams()
+      },
+      setNoInstruments: (enabled) => {
+        set({ noInstruments: enabled })
+        get().updateStyleFromParams()
+      },
+      setDryVocals: (enabled) => {
+        set({ dryVocals: enabled })
+        get().updateStyleFromParams()
+      },
+      setIntroWithoutKick: (enabled) => {
+        set({ introWithoutKick: enabled })
+        get().updateStyleFromParams()
+      },
       setReferenceNotes: (notes) => set({ referenceNotes: notes }),
-      setReferenceArtists: (artists) => set({ referenceArtists: artists }),
+      setReferenceArtists: (artists) => {
+        set({ referenceArtists: artists })
+        get().updateStyleFromParams()
+      },
       setPresetId: (id) => set({ presetId: id }),
-      setStylePct: (percentage) => set({ stylePercentage: percentage }),
-      setWeirdPct: (percentage) => set({ weirdnessPercentage: percentage }),
       setStyle: (style) => set({ style }),
+
       generateStyleLine: () => {
         const state = get()
         const parts = [
@@ -98,28 +132,27 @@ export const useMetaStore = create<MetaState>()(
 
         return parts.join(", ")
       },
-      saveToHistory: async (lyrics: string) => {
+
+      updateStyleFromParams: () => {
         const state = get()
-        const historyStore = useHistoryStore.getState()
-
-        // Create hash for deduplication
-        const hash = btoa(`${state.style}-${lyrics}`).slice(0, 16)
-
-        await historyStore.addEntry({
-          style: state.style,
-          lyrics,
+        const generatedStyle = buildStyle({
           bpm: state.bpm,
           key: state.key,
-          presetId: state.presetId,
+          vocal: state.vocal,
+          era: state.era,
+          mood: state.mood,
+          stylePercentage: state.stylePercentage,
+          weirdnessPercentage: state.weirdnessPercentage,
           toggles: {
+            introNoKick: state.introWithoutKick,
             acapellaOnly: state.acapellaOnly,
-            noInstruments: state.noInstruments,
             dryVocals: state.dryVocals,
-            introWithoutKick: state.introWithoutKick,
+            noInstruments: state.noInstruments,
           },
-          hash,
-          pinned: false,
+          referenceArtists: state.referenceArtists,
+          presetId: state.presetId,
         })
+        set({ style: generatedStyle })
       },
     }),
     {
